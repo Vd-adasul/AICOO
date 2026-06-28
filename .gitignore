@@ -26,3 +26,9 @@ Thumbs.db
 *.njsproj
 *.sln
 *.sw?
+
+# Project reference text files
+prompt.txt
+refermce.txt
+working.txt
+
