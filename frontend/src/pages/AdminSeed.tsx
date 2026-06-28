@@ -75,7 +75,7 @@ export default function AdminSeed() {
           <button
             onClick={triggerSeeding}
             disabled={isSeeding}
-            className="w-full py-3 bg-red-650 hover:bg-red-600 disabled:opacity-40 text-white font-mono font-bold text-xs uppercase tracking-wider rounded-lg border border-red-950 transition-all duration-300 flex items-center justify-center gap-2 shadow-lg shadow-red-600/10"
+            className="w-full py-3 bg-red-700 hover:bg-red-600 disabled:opacity-40 text-white font-mono font-bold text-xs uppercase tracking-wider rounded-lg border border-red-950 transition-all duration-300 flex items-center justify-center gap-2 shadow-lg shadow-red-600/10"
           >
             {isSeeding ? (
               <>

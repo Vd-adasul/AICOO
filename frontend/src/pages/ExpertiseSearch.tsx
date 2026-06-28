@@ -32,7 +32,7 @@ export default function ExpertiseSearch() {
       {/* Header */}
       <div>
         <div className="flex items-center gap-2 text-neon-cobalt mb-2">
-          <Search className="absolute-icon h-4 w-4" />
+          <Search className="h-4 w-4" />
           <span className="font-mono text-xs uppercase tracking-wider">Agent Discovery</span>
         </div>
         <h2 className="font-display font-bold text-3xl text-gray-100">

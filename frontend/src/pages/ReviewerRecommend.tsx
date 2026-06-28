@@ -39,7 +39,7 @@ export default function ReviewerRecommend() {
         projectId: selectedProjId,
         architectureDescription: description
       });
-      setResults(res.data || []);
+      setResults(res.data.recommendations || []);
     } catch (err) {
       console.error(err);
     } finally {
