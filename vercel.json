@@ -1,0 +1,8 @@
+{
+  "rewrites": [
+    {
+      "source": "/api/:path*",
+      "destination": "https://twinos-backend.onrender.com/api/:path*"
+    }
+  ]
+}
