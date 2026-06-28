@@ -159,8 +159,14 @@ router.post('/search', protect, async (req, res) => {
 
     let answer = '';
     if (process.env.GEMINI_API_KEY) {
-      answer = await searchOrganizationalMemory(question, systemStateContext);
-    } else {
+      try {
+        answer = await searchOrganizationalMemory(question, systemStateContext);
+      } catch (err) {
+        console.error('searchOrganizationalMemory failed, using fallback:', err.message);
+      }
+    }
+
+    if (!answer || answer.startsWith('Error retrieving response')) {
       // Fallback simple search
       const query = question.toLowerCase();
       const match = decisions.find(d => 
@@ -170,9 +176,9 @@ router.post('/search', protect, async (req, res) => {
       );
 
       if (match) {
-        answer = `Fallback search result: Found decision "${match.title}" authored by ${match.ownerId?.name || 'unknown'} on project ${match.projectId?.name || 'unknown'}. Reason: "${match.reason}".`;
+        answer = `Offline search result: Found decision "${match.title}" authored by ${match.ownerId?.name || 'unknown'} on project ${match.projectId?.name || 'unknown'}. Reason: "${match.reason}".`;
       } else {
-        answer = `Fallback search result: No matching decisions found containing "${question}" in our offline databases. (Set GEMINI_API_KEY in .env for full semantic reasoning).`;
+        answer = `Offline search result: No matching decisions found containing "${question}" in our databases. (Check if GEMINI_API_KEY environment variable is configured correctly on Render).`;
       }
     }
 

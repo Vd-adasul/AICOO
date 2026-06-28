@@ -26,8 +26,14 @@ router.post('/aicoo/route', protect, async (req, res) => {
     
     let recommendations = [];
     if (process.env.GEMINI_API_KEY) {
-      recommendations = await recommendReviewers(requirement, twins);
-    } else {
+      try {
+        recommendations = await recommendReviewers(requirement, twins);
+      } catch (err) {
+        console.error('recommendReviewers failed, falling back to offline search:', err.message);
+      }
+    }
+
+    if (!recommendations || recommendations.length === 0) {
       // Offline fallback: regex matching
       const reqLower = requirement.toLowerCase();
       const pool = twins.map(t => {
@@ -79,8 +85,14 @@ router.post('/expertise/search', protect, async (req, res) => {
     let recommendations = [];
 
     if (process.env.GEMINI_API_KEY) {
-      recommendations = await recommendReviewers(question, twins);
-    } else {
+      try {
+        recommendations = await recommendReviewers(question, twins);
+      } catch (err) {
+        console.error('Expertise search recommendReviewers failed, falling back:', err.message);
+      }
+    }
+
+    if (!recommendations || recommendations.length === 0) {
       const queryLower = question.toLowerCase();
       const pool = twins.map(t => {
         let score = 50;
@@ -121,8 +133,14 @@ router.post('/reviewers/recommend', protect, async (req, res) => {
     let recommendations = [];
 
     if (process.env.GEMINI_API_KEY) {
-      recommendations = await recommendReviewers(architectureDescription, twins);
-    } else {
+      try {
+        recommendations = await recommendReviewers(architectureDescription, twins);
+      } catch (err) {
+        console.error('Reviewer recommendation recommendReviewers failed, falling back:', err.message);
+      }
+    }
+
+    if (!recommendations || recommendations.length === 0) {
       const descLower = architectureDescription.toLowerCase();
       const pool = twins.map(t => {
         let score = 45;
