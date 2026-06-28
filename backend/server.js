@@ -39,7 +39,7 @@ app.use('/api/auth', authRoutes);
 app.use('/api/users', userRoutes);
 app.use('/api/twins', twinRoutes);
 app.use('/api/projects', projectRoutes);
-app.use('/api/decisions', decisionsRoutes);
+app.use('/api/decisions', decisionRoutes);
 app.use('/api/meetings', meetingRoutes);
 app.use('/api/documents', documentRoutes);
 app.use('/api', aicooRoutes);
