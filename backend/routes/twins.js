@@ -138,9 +138,9 @@ router.put('/:id', protect, async (req, res) => {
 // @access  Private
 router.get('/:id/graph', protect, async (req, res) => {
   try {
-    let twin = await Twin.findById(req.params.id);
+    let twin = await Twin.findById(req.params.id).populate('relationships.userId', 'name role');
     if (!twin) {
-      twin = await Twin.findOne({ userId: req.params.id });
+      twin = await Twin.findOne({ userId: req.params.id }).populate('relationships.userId', 'name role');
     }
 
     if (!twin) {
@@ -190,6 +190,25 @@ router.get('/:id/graph', protect, async (req, res) => {
         links.push({ source: decision._id.toString(), target: decision.projectId.toString(), relation: 'impacts' });
       }
     });
+
+    // Teammates / Relationships nodes & connections
+    if (twin.relationships && twin.relationships.length > 0) {
+      twin.relationships.forEach(rel => {
+        if (rel.userId) {
+          nodes.push({
+            id: rel.userId._id.toString(),
+            label: rel.userId.name,
+            type: 'person',
+            role: rel.userId.role
+          });
+          links.push({
+            source: user._id.toString(),
+            target: rel.userId._id.toString(),
+            relation: rel.type || 'Teammate'
+          });
+        }
+      });
+    }
 
     res.json({ nodes, links });
   } catch (error) {

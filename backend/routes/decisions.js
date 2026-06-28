@@ -167,13 +167,56 @@ router.post('/search', protect, async (req, res) => {
     }
 
     if (!answer || answer.startsWith('Error retrieving response')) {
-      // Fallback simple search
-      const query = question.toLowerCase();
-      const match = decisions.find(d => 
-        d.title.toLowerCase().includes(query) || 
-        d.description.toLowerCase().includes(query) || 
-        d.reason.toLowerCase().includes(query)
-      );
+      // Fallback simple search with fuzzy term matching
+      const queryLower = question.toLowerCase();
+      const stopWords = new Set(['why', 'did', 'we', 'reject', 'the', 'a', 'an', 'for', 'of', 'in', 'on', 'at', 'to', 'is', 'are', 'was', 'were', 'about']);
+      const queryWords = queryLower.split(/[^a-zA-Z0-9]+/).filter(w => w.length >= 3 && !stopWords.has(w));
+      
+      const scoredDecisions = decisions.map(d => {
+        let score = 0;
+        const text = (d.title + ' ' + d.description + ' ' + d.reason).toLowerCase();
+        
+        if (text.includes(queryLower)) {
+          score += 100;
+        }
+        
+        queryWords.forEach(word => {
+          if (text.includes(word)) {
+            score += 20;
+          } else {
+            // Check for simple typos (max 1 character difference)
+            const wordsInText = text.split(/[^a-zA-Z0-9]+/);
+            const hasFuzzyMatch = wordsInText.some(w => {
+              if (Math.abs(w.length - word.length) <= 1) {
+                let diff = 0;
+                let i = 0, j = 0;
+                while (i < w.length && j < word.length) {
+                  if (w[i] === word[j]) {
+                    i++;
+                    j++;
+                  } else {
+                    diff++;
+                    if (w.length > word.length) i++;
+                    else if (w.length < word.length) j++;
+                    else { i++; j++; }
+                  }
+                }
+                diff += (w.length - i) + (word.length - j);
+                return diff <= 1;
+              }
+              return false;
+            });
+            if (hasFuzzyMatch) {
+              score += 15;
+            }
+          }
+        });
+        
+        return { decision: d, score };
+      });
+      
+      scoredDecisions.sort((a, b) => b.score - a.score);
+      const match = scoredDecisions[0]?.score > 0 ? scoredDecisions[0].decision : null;
 
       if (match) {
         answer = `Offline search result: Found decision "${match.title}" authored by ${match.ownerId?.name || 'unknown'} on project ${match.projectId?.name || 'unknown'}. Reason: "${match.reason}".`;
