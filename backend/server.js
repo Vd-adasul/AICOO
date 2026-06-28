@@ -7,7 +7,8 @@ import { fileURLToPath } from 'url';
 import connectDB from './config/db.js';
 import seedData from './utils/seed.js';
 
-// Import Routers
+// Import models & Routers
+import User from './models/User.js';
 import authRoutes from './routes/auth.js';
 import userRoutes from './routes/users.js';
 import twinRoutes from './routes/twins.js';
@@ -25,8 +26,19 @@ const __dirname = path.dirname(__filename);
 // Load environment variables from workspace root
 dotenv.config({ path: path.join(__dirname, '../.env') });
 
-// Connect to MongoDB
-connectDB();
+// Connect to MongoDB & Auto-seed if empty
+connectDB().then(async () => {
+  try {
+    const userCount = await User.countDocuments({});
+    if (userCount === 0) {
+      console.log('Database is empty. Automatically running database seeder...');
+      await seedData(false);
+      console.log('Database successfully auto-seeded on startup.');
+    }
+  } catch (err) {
+    console.error('Auto-seeding check failed on server startup:', err.message);
+  }
+});
 
 const app = express();
 

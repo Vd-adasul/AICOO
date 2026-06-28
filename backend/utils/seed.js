@@ -21,7 +21,7 @@ const __dirname = path.dirname(__filename);
 // Load env variables
 dotenv.config({ path: path.join(__dirname, '../../.env') });
 
-const seedData = async () => {
+const seedData = async (shouldCloseConnection = false) => {
   try {
     const mongoUri = process.env.MONGODB_URI;
     if (!mongoUri) {
@@ -533,20 +533,25 @@ const seedData = async () => {
     console.log('Created AICOO Agent logs successfully.');
 
     console.log('Database seeded successfully!');
-    await mongoose.connection.close();
-    console.log('Database connection closed.');
+    if (shouldCloseConnection) {
+      await mongoose.connection.close();
+      console.log('Database connection closed.');
+    }
   } catch (error) {
     console.error('Seeding failed:', error);
-    try {
-      await mongoose.connection.close();
-    } catch (_) {}
-    process.exit(1);
+    if (shouldCloseConnection) {
+      try {
+        await mongoose.connection.close();
+      } catch (_) {}
+      process.exit(1);
+    }
+    throw error;
   }
 };
 
 // If executing directly, run seed
 if (process.argv[1] === fileURLToPath(import.meta.url)) {
-  seedData();
+  seedData(true);
 }
 
 export default seedData;
