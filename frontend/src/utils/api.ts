@@ -2,9 +2,11 @@ import axios from 'axios';
 
 // Create Axios Instance
 const api = axios.create({
-  // In production, Vercel will point to the Render API endpoint via the VITE_API_URL env variable.
-  // In local development, it will default to '/api' which is proxied to http://localhost:5000.
-  baseURL: import.meta.env.VITE_API_URL || '/api',
+  // VITE_API_URL should be e.g. https://twinos-backend.onrender.com
+  // We always append /api so routes like /auth/login resolve correctly.
+  baseURL: import.meta.env.VITE_API_URL
+    ? `${import.meta.env.VITE_API_URL}/api`
+    : '/api',
   headers: {
     'Content-Type': 'application/json',
   },
