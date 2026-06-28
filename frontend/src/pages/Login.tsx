@@ -66,7 +66,8 @@ export default function Login() {
       navigate('/');
     } catch (err: any) {
       console.error(err);
-      setError('Quick login failed. Make sure database is seeded first.');
+      const errMsg = err.response?.data?.message || err.message || 'Connection error';
+      setError(`Quick login failed: ${errMsg}. (Check if VITE_API_URL is configured on Vercel)`);
     } finally {
       setIsLoading(false);
     }
